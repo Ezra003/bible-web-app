@@ -26,7 +26,6 @@ import BibleContent from "./bible-content"
 import SearchResults from "./search-results"
 import Bookmarks from "./bookmarks"
 import ReadingHistory from "./reading-history"
-import SettingsPanel from "./settings-panel"
 import ThemeToggle from "./theme-toggle"
 import { bibleBooks } from "@/lib/bible-data"
 import { useLocalStorage } from "@/hooks/use-local-storage"
@@ -39,7 +38,6 @@ export default function BibleReader() {
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("read")
   const [searchQuery, setSearchQuery] = useState("")
-  const [showSettings, setShowSettings] = useState(false)
 
   // Get current book, chapter from URL or set defaults
   const book = searchParams.get("book") || "Genesis"
@@ -53,12 +51,6 @@ export default function BibleReader() {
       date: string
     }>
   >("readingHistory", [])
-
-  // Font size setting
-  const [fontSize, setFontSize] = useLocalStorage<string>("fontSize", "medium")
-
-  // Get the current book object
-  const currentBookObj = useMemo(() => bibleBooks.find((b) => b.name === book) || bibleBooks[0], [book])
 
   // Navigate to a specific book and chapter
   const navigateTo = (newBook: string, newChapter: number) => {
@@ -97,7 +89,7 @@ export default function BibleReader() {
   const goToNextChapter = () => {
     const currentBookIndex = bibleBooks.findIndex((b) => b.name === book)
 
-    if (chapter < currentBookObj.chapters) {
+    if (chapter < bibleBooks[currentBookIndex].chapters) {
       // Go to next chapter in the same book
       navigateTo(book, chapter + 1)
     } else if (currentBookIndex < bibleBooks.length - 1) {
@@ -132,65 +124,21 @@ export default function BibleReader() {
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [activeTab])
 
-  // Get font size class
-  const fontSizeClass = useMemo(() => {
-    switch (fontSize) {
-      case "small":
-        return "text-sm leading-relaxed"
-      case "large":
-        return "text-xl leading-relaxed"
-      case "x-large":
-        return "text-2xl leading-relaxed"
-      default:
-        return "text-base leading-relaxed"
-    }
-  }, [fontSize])
-
   return (
-    <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="mr-2 md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="py-4">
-                <BibleNavigation onSelectPassage={navigateTo} currentBook={book} currentChapter={chapter} />
-              </div>
-            </SheetContent>
-          </Sheet>
-          <h1 className="text-2xl font-bold flex items-center">
-            <BookOpen className="mr-2 h-6 w-6" /> Holy Bible
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-2">
+        <h1 className="text-3xl font-bold">Bible Reader</h1>
+        <div className="flex gap-2">
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowSettings(!showSettings)}
-            aria-label="Settings"
-          >
-            <Settings className="h-5 w-5" />
-          </Button>
         </div>
       </div>
-
-      {showSettings && (
-        <SettingsPanel fontSize={fontSize} setFontSize={setFontSize} onClose={() => setShowSettings(false)} />
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-6">
         <div className="hidden md:block border rounded-lg p-4 h-[calc(100vh-200px)] overflow-y-auto">
           <BibleNavigation onSelectPassage={navigateTo} currentBook={book} currentChapter={chapter} />
         </div>
 
-        <div className={`border rounded-lg p-4 ${fontSizeClass}`}>
+        <div className="border rounded-lg p-4">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <div className="flex justify-between items-center mb-4">
               <TabsList>
