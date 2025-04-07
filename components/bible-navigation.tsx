@@ -1,9 +1,8 @@
 "use client"
 
-import React from "react"
+import React, { useState, useMemo, useCallback } from "react"
 
-import { useState, useMemo, useCallback } from "react"
-import { ChevronDown, ChevronRight, Search } from "lucide-react"
+import { ChevronDown, ChevronRight, Search, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -16,7 +15,7 @@ interface BibleNavigationProps {
   currentChapter: number
 }
 
-export default function BibleNavigation({ onSelectPassage, currentBook, currentChapter }: BibleNavigationProps) {
+const BibleNavigation = ({ onSelectPassage, currentBook, currentChapter }: BibleNavigationProps) => {
   const [openBooks, setOpenBooks] = useState<Record<string, boolean>>({
     [currentBook]: true,
   })
@@ -32,26 +31,30 @@ export default function BibleNavigation({ onSelectPassage, currentBook, currentC
   // Filter books based on search term
   const filteredBooks = useMemo(() => {
     if (!searchTerm.trim()) return bibleBooks
-
-    return bibleBooks.filter((book) => book.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    return bibleBooks.filter((book) =>
+      book.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   }, [searchTerm])
 
   // Group books by testament
   const oldTestamentBooks = useMemo(() => filteredBooks.filter((book) => book.testament === "old"), [filteredBooks])
-
   const newTestamentBooks = useMemo(() => filteredBooks.filter((book) => book.testament === "new"), [filteredBooks])
 
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Find a book..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-8"
-        />
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold">Books</h2>
+        <div className="flex items-center gap-2 ml-4">
+          <Input
+            placeholder="Search books..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full max-w-sm"
+          />
+          <Button variant="ghost" size="icon" onClick={() => setSearchTerm("")}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <ScrollArea className="h-[calc(100vh-250px)]">
@@ -79,7 +82,7 @@ export default function BibleNavigation({ onSelectPassage, currentBook, currentC
 
               {newTestamentBooks.length > 0 && (
                 <>
-                  <h2 className="font-semibold mb-2 mt-4">New Testament</h2>
+                  <h2 className="font-semibold mb-2">New Testament</h2>
                   {newTestamentBooks.map((book) => (
                     <BookItem
                       key={book.name}
@@ -152,3 +155,4 @@ const BookItem = React.memo(function BookItem({
   )
 })
 
+export default BibleNavigation

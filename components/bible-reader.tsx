@@ -27,13 +27,14 @@ import SearchResults from "./search-results"
 import Bookmarks from "./bookmarks"
 import ReadingHistory from "./reading-history"
 import SettingsPanel from "./settings-panel"
+import ThemeToggle from "./theme-toggle"
 import { bibleBooks } from "@/lib/bible-data"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 
 export default function BibleReader() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { theme, setTheme } = useTheme()
+  const { theme } = useTheme()
 
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState("read")
@@ -129,9 +130,9 @@ export default function BibleReader() {
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [activeTab, book, chapter])
+  }, [activeTab])
 
-  // Font size class based on setting
+  // Get font size class
   const fontSizeClass = useMemo(() => {
     switch (fontSize) {
       case "small":
@@ -141,7 +142,7 @@ export default function BibleReader() {
       case "x-large":
         return "text-2xl leading-relaxed"
       default:
-        return "text-base leading-relaxed" // medium
+        return "text-base leading-relaxed"
     }
   }, [fontSize])
 
@@ -168,16 +169,14 @@ export default function BibleReader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setShowSettings(!showSettings)} aria-label="Settings">
-            <Settings className="h-5 w-5" />
-          </Button>
+          <ThemeToggle />
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            aria-label="Toggle theme"
+            onClick={() => setShowSettings(!showSettings)}
+            aria-label="Settings"
           >
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            <Settings className="h-5 w-5" />
           </Button>
         </div>
       </div>
@@ -277,4 +276,3 @@ export default function BibleReader() {
     </div>
   )
 }
-

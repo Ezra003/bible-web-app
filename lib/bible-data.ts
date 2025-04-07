@@ -34,10 +34,19 @@ const typedKJVData = kjvData as {
   books: BibleBookData[]
 }
 
-export const bibleBooks: BibleBook[] = typedKJVData.books.map((book: BibleBookData) => ({
+// Function to determine testament based on book position
+const getTestament = (bookName: string, bookIndex: number): "old" | "new" => {
+  // Matthew is the first New Testament book
+  if (bookIndex >= typedKJVData.books.findIndex((book) => book.name === "Matthew")) return "new"
+  
+  // All books before Matthew are Old Testament
+  return "old"
+}
+
+export const bibleBooks: BibleBook[] = typedKJVData.books.map((book: BibleBookData, index: number) => ({
   name: book.name,
   chapters: book.chapters.length,
-  testament: book.name === "Genesis" ? "old" : book.name === "Revelation" ? "new" : book.name === "Matthew" ? "new" : "old"
+  testament: getTestament(book.name, index)
 }))
 
 export const getBibleChapter = (book: string, chapter: number): BibleChapterData | null => {
