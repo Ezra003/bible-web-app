@@ -196,9 +196,6 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading }
   return (
     <div className="relative">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-semibold">
-          {bibleContent.book_name} {bibleContent.chapter}
-        </h2>
         <div className="flex gap-2">
           <Button
             variant="outline"
