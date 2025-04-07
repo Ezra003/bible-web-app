@@ -31,6 +31,7 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading, 
   const { toast } = useToast()
   const contentRef = useRef<HTMLDivElement>(null)
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [showFullChapter, setShowFullChapter] = useState(false)
 
   const [bookmarks, setBookmarks] = useLocalStorage<
     Array<{
@@ -225,22 +226,42 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading, 
       </div>
 
       <div className="space-y-4" ref={contentRef}>
-        {bibleContent.verses.map((verse) => (
-          <div
-            key={verse.verse}
-            className={`flex items-start gap-2 ${
-              showOnlyVerse === verse.verse
-                ? "bg-accent/50"
-                : "hover:bg-accent/10 transition-colors"
-            }`}
-          >
+        {showOnlyVerse !== undefined && !showFullChapter ? (
+          <div className="flex items-start gap-2">
             <span className="text-sm text-muted-foreground min-w-[30px]">
-              {verse.verse}.
+              {showOnlyVerse}.
             </span>
-            <p className="text-lg leading-relaxed">{verse.text}</p>
+            <p className="text-lg leading-relaxed">
+              {bibleContent.verses.find((v) => v.verse === showOnlyVerse)?.text || ""}
+            </p>
           </div>
-        ))}
+        ) : (
+          bibleContent.verses.map((verse) => (
+            <div
+              key={verse.verse}
+              className={`flex items-start gap-2 ${
+                verse.verse === showOnlyVerse ? "bg-accent/50" : "hover:bg-accent/10 transition-colors"
+              }`}
+            >
+              <span className="text-sm text-muted-foreground min-w-[30px]">
+                {verse.verse}.
+              </span>
+              <p className="text-lg leading-relaxed">{verse.text}</p>
+            </div>
+          ))
+        )}
       </div>
+
+      {showOnlyVerse !== undefined && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-center"
+          onClick={() => setShowFullChapter(!showFullChapter)}
+        >
+          {showFullChapter ? "Show Only Verse" : "Show Full Chapter"}
+        </Button>
+      )}
 
       {showScrollTop && (
         <Button

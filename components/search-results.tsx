@@ -36,10 +36,16 @@ export default function SearchResults({ query, onSelectPassage }: SearchResultsP
         // Search through all verses
         for (const verse of chapterData.verses) {
           if (verse.text.toLowerCase().includes(query.toLowerCase())) {
+            // Create a new object with just the matching verse
+            const matchingVerse = {
+              verse: verse.verse,
+              text: verse.text
+            }
+
             searchResults.push({
               book_name: book.name,
               chapter: chapter,
-              verses: [verse],
+              verses: [matchingVerse],
               reference: `${book.name} ${chapter}:${verse.verse}`
             })
             break // Stop after finding the first matching verse in this chapter
@@ -85,12 +91,16 @@ export default function SearchResults({ query, onSelectPassage }: SearchResultsP
                     <ExternalLink className="h-4 w-4" />
                   </Button>
                 </div>
-                <BibleContent
-                  book={result.book_name}
-                  chapter={result.chapter}
-                  isLoading={false}
-                  showOnlyVerse={result.verses[0].verse}
-                />
+                <div className="space-y-2">
+                  {result.verses.map((verse) => (
+                    <div key={verse.verse} className="flex items-start gap-2">
+                      <span className="text-sm text-muted-foreground min-w-[30px]">
+                        {verse.verse}.
+                      </span>
+                      <p className="text-lg leading-relaxed">{verse.text}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
