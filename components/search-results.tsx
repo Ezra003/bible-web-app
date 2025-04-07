@@ -4,12 +4,11 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ExternalLink } from "lucide-react"
 import { BibleChapterData } from "@/lib/bible-data"
-import BibleContent from "./bible-content"
 import { bibleBooks, getBibleChapter } from "@/lib/bible-data"
 
 interface SearchResultsProps {
   query: string
-  onSelectPassage: (book: string, chapter: number) => void
+  onSelectPassage: (book: string, chapter: number, verse: number) => void
 }
 
 export default function SearchResults({ query, onSelectPassage }: SearchResultsProps) {
@@ -36,16 +35,10 @@ export default function SearchResults({ query, onSelectPassage }: SearchResultsP
         // Search through all verses
         for (const verse of chapterData.verses) {
           if (verse.text.toLowerCase().includes(query.toLowerCase())) {
-            // Create a new object with just the matching verse
-            const matchingVerse = {
-              verse: verse.verse,
-              text: verse.text
-            }
-
             searchResults.push({
               book_name: book.name,
               chapter: chapter,
-              verses: [matchingVerse],
+              verses: [verse],
               reference: `${book.name} ${chapter}:${verse.verse}`
             })
             break // Stop after finding the first matching verse in this chapter
@@ -76,7 +69,7 @@ export default function SearchResults({ query, onSelectPassage }: SearchResultsP
               <div
                 key={result.reference}
                 className="border rounded-lg p-4 hover:bg-accent/50 cursor-pointer"
-                onClick={() => onSelectPassage(result.book_name, result.chapter)}
+                onClick={() => onSelectPassage(result.book_name, result.chapter, result.verses[0].verse)}
               >
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="font-semibold">{result.reference}</h3>
@@ -85,7 +78,7 @@ export default function SearchResults({ query, onSelectPassage }: SearchResultsP
                     size="icon"
                     onClick={(e) => {
                       e.stopPropagation()
-                      onSelectPassage(result.book_name, result.chapter)
+                      onSelectPassage(result.book_name, result.chapter, result.verses[0].verse)
                     }}
                   >
                     <ExternalLink className="h-4 w-4" />

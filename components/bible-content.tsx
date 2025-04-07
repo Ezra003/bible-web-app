@@ -43,12 +43,12 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading, 
 
   const isBookmarked = bookmarks.some((b) => b.book === book && b.chapter === chapter)
 
-  const fetchBibleContent = useCallback(() => {
+  const loadChapter = useCallback(async () => {
     setLoading(true)
     setError(null)
 
     try {
-      const chapterData = getBibleChapter(book, chapter)
+      const chapterData = await getBibleChapter(book, chapter)
       if (!chapterData) {
         throw new Error("Chapter not found")
       }
@@ -58,15 +58,21 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading, 
       setError("Failed to load Bible content. Please try again later.")
     } finally {
       setLoading(false)
-      if (contentRef.current) {
-        contentRef.current.scrollTop = 0
+      if (contentRef.current && showOnlyVerse !== undefined) {
+        const verseElement = contentRef.current.querySelector(`[data-verse="${showOnlyVerse}"]`)
+        if (verseElement) {
+          // Prevent scroll jump by using setTimeout
+          setTimeout(() => {
+            verseElement.scrollIntoView({ behavior: "smooth", block: "center" })
+          }, 0)
+        }
       }
     }
-  }, [book, chapter])
+  }, [book, chapter, showOnlyVerse])
 
   useEffect(() => {
-    fetchBibleContent()
-  }, [fetchBibleContent])
+    loadChapter()
+  }, [loadChapter])
 
   useEffect(() => {
     const handleScroll = debounce(() => {
@@ -167,6 +173,21 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading, 
     }
   }
 
+  const scrollToShowVerse = useCallback(() => {
+    if (contentRef.current && showOnlyVerse !== undefined) {
+      const verseElement = contentRef.current.querySelector(`[data-verse="${showOnlyVerse}"]`)
+      if (verseElement) {
+        verseElement.scrollIntoView({ behavior: "smooth", block: "center" })
+      }
+    }
+  }, [showOnlyVerse])
+
+  useEffect(() => {
+    if (showFullChapter && showOnlyVerse !== undefined) {
+      scrollToShowVerse()
+    }
+  }, [showFullChapter, scrollToShowVerse])
+
   if (parentLoading || loading) {
     return (
       <div className="space-y-4">
@@ -180,7 +201,7 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading, 
     return (
       <div className="text-destructive">
         <p>{error}</p>
-        <Button onClick={fetchBibleContent} variant="outline">
+        <Button onClick={loadChapter} variant="outline">
           Retry
         </Button>
       </div>
@@ -242,6 +263,7 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading, 
               className={`flex items-start gap-2 ${
                 verse.verse === showOnlyVerse ? "bg-accent/50" : "hover:bg-accent/10 transition-colors"
               }`}
+              data-verse={verse.verse}
             >
               <span className="text-sm text-muted-foreground min-w-[30px]">
                 {verse.verse}.

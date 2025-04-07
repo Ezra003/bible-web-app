@@ -1,34 +1,41 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import {
-  BookOpen,
-  Search,
-  Menu,
-  Moon,
-  Sun,
-  BookMarked,
-  History,
-  ChevronLeft,
-  ChevronRight,
-  Settings,
-} from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useTheme } from "next-themes"
-import BibleNavigation from "./bible-navigation"
 import BibleContent from "./bible-content"
+import BibleNavigation from "./bible-navigation"
 import SearchResults from "./search-results"
 import Bookmarks from "./bookmarks"
 import ReadingHistory from "./reading-history"
 import ThemeToggle from "./theme-toggle"
 import { bibleBooks } from "@/lib/bible-data"
 import { useLocalStorage } from "@/hooks/use-local-storage"
+import {
+  BookOpen,
+  BookMarked,
+  History,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  X,
+} from "lucide-react"
+
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs"
+
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { useTheme } from "next-themes"
 
 export default function BibleReader() {
   const router = useRouter()
@@ -53,9 +60,9 @@ export default function BibleReader() {
   >("readingHistory", [])
 
   // Navigate to a specific book and chapter
-  const navigateTo = (newBook: string, newChapter: number) => {
+  const navigateTo = useCallback((newBook: string, newChapter: number, verse?: number) => {
     // Update URL
-    router.push(`/?book=${encodeURIComponent(newBook)}&chapter=${newChapter}`)
+    router.push(`/?book=${encodeURIComponent(newBook)}&chapter=${newChapter}${verse ? `&verse=${verse}` : ''}`)
 
     // Add to reading history
     const newEntry = { book: newBook, chapter: newChapter, date: new Date().toISOString() }
@@ -69,7 +76,7 @@ export default function BibleReader() {
 
     // Reset to read tab when navigating
     setActiveTab("read")
-  }
+  }, [readingHistory, setReadingHistory, setActiveTab, router])
 
   // Handle navigation to previous chapter
   const goToPreviousChapter = () => {
@@ -199,11 +206,19 @@ export default function BibleReader() {
                     </Button>
                   </div>
                 </div>
-                <BibleContent book={book} chapter={chapter} isLoading={isLoading} />
+                <BibleContent 
+                  book={book} 
+                  chapter={chapter} 
+                  isLoading={isLoading} 
+                  showOnlyVerse={Number(searchParams.get("verse")) || undefined}
+                />
               </TabsContent>
 
               <TabsContent value="search" className="mt-0">
-                <SearchResults query={searchQuery} onSelectPassage={navigateTo} />
+                <SearchResults query={searchQuery} onSelectPassage={(book, chapter, verse) => {
+                  navigateTo(book, chapter, verse)
+                  setActiveTab("read")
+                }} />
               </TabsContent>
 
               <TabsContent value="bookmarks" className="mt-0">
