@@ -15,7 +15,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Bible App",
   description: "A modern Bible web application with easy reading experience",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" },
@@ -29,7 +28,7 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-    generator: 'v0.dev'
+  generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -38,13 +37,23 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+          value={{
+            light: "light",
+            dark: "dark",
+          }}
+        >
           {children}
           <Toaster />
         </ThemeProvider>
@@ -52,7 +61,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'
