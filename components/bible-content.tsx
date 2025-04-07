@@ -21,9 +21,10 @@ interface BibleContentProps {
   book: string
   chapter: number
   isLoading: boolean
+  showOnlyVerse?: number
 }
 
-export default function BibleContent({ book, chapter, isLoading: parentLoading }: BibleContentProps) {
+export default function BibleContent({ book, chapter, isLoading: parentLoading, showOnlyVerse }: BibleContentProps) {
   const [bibleContent, setBibleContent] = useState<BibleChapterData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -168,12 +169,8 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading }
   if (parentLoading || loading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-8 w-1/2" />
-        <div className="space-y-2">
-          {[...Array(10)].map((_, i) => (
-            <Skeleton key={i} className="h-6 w-full" />
-          ))}
-        </div>
+        <div className="h-8 w-32 bg-muted/50 rounded animate-pulse" />
+        <div className="h-6 w-48 bg-muted/50 rounded animate-pulse" />
       </div>
     )
   }
@@ -190,7 +187,7 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading }
   }
 
   if (!bibleContent) {
-    return <div>Loading...</div>
+    return <div className="text-center text-muted-foreground">Loading...</div>
   }
 
   return (
@@ -229,7 +226,14 @@ export default function BibleContent({ book, chapter, isLoading: parentLoading }
 
       <div className="space-y-4" ref={contentRef}>
         {bibleContent.verses.map((verse) => (
-          <div key={verse.verse} className="flex items-start gap-2">
+          <div
+            key={verse.verse}
+            className={`flex items-start gap-2 ${
+              showOnlyVerse === verse.verse
+                ? "bg-accent/50"
+                : "hover:bg-accent/10 transition-colors"
+            }`}
+          >
             <span className="text-sm text-muted-foreground min-w-[30px]">
               {verse.verse}.
             </span>

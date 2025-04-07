@@ -1,11 +1,13 @@
 import kjvData from "@/data/KJV.json"
 
+interface BibleVerse {
+  verse: number
+  text: string
+}
+
 interface BibleChapter {
   chapter: number
-  verses: Array<{
-    verse: number
-    text: string
-  }>
+  verses: BibleVerse[]
 }
 
 interface BibleBookData {
@@ -22,10 +24,7 @@ interface BibleBook {
 export interface BibleChapterData {
   book_name: string
   chapter: number
-  verses: Array<{
-    verse: number
-    text: string
-  }>
+  verses: BibleVerse[]
   reference: string
 }
 
@@ -68,6 +67,6 @@ export const getVerseText = (book: string, chapter: number, verse: number): stri
   const chapterData = getBibleChapter(book, chapter)
   if (!chapterData) return ""
   
-  const verseData = chapterData.verses.find((v: { verse: number; text: string }) => v.verse === verse)
+  const verseData = chapterData.verses.find((v: BibleVerse) => v.verse === verse)
   return verseData ? verseData.text : ""
 }
