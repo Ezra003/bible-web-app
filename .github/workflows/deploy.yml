@@ -19,3 +19,8 @@ jobs:
         with:
           branch: gh-pages
           folder: out
+          clean: true
+          force: true
+          target-folder: /bible-web-app
+          build-script: npm run export
+          commit-message: 'Deploy to GitHub Pages'
